@@ -375,6 +375,9 @@ class LocationParser(Parser):
 
 class StatParser(Parser):
     def convert(self, string):
+        result = string.replace(' ', '_')
+        if result not in constants.stats.keys():
+            raise Parser.ConversionError(string)
         return string.replace(' ', '_')
 
     def make_error_message(self, error, string):
@@ -441,7 +444,10 @@ def get_report(location, date):
 def plot_trend(stat, location, interval):
     dataset = InfectionDataset.download(location, interval)
     dates = dataset.dates
-    values = dataset[stat]
+    if stat in dataset.stats:
+        values = dataset[stat]
+    else:
+        raise KeyError(dataset.stats)
     return plot(dates, values, location=location, stat=stat)
 
 

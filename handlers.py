@@ -7,6 +7,7 @@ from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Fi
 
 import core
 import constants
+
 MARKDOWN = telegram.parsemode.ParseMode.MARKDOWN
 
 # Conversation states
@@ -139,16 +140,27 @@ def cb_trends_request(update: Update, context: CallbackContext):
     parser.parse(request)
     if parser.status is True:
         stat, location, interval = parser.result
-        graph = core.plot_trend(stat, location, interval)
+        try:
+            graph = core.plot_trend(stat, location, interval)
+        except KeyError as e:
+            available_stats = sorted(map(lambda s: s.replace('_', ' ').capitalize(), e.args[0]))
+            available_stats = ', '.join(available_stats)
+            send_message(
+                update, context,
+                f"Non ci sono dati su '{stat}' per '{location}'. Ricorda che i dati pubblicati dalla Protezione Civile"
+                f"sulle province, regioni e lo stato sono diversi.\n\nI dati disponibili per '{location}' sono: "
+                f"{available_stats}."
+            )
+            return
         send_photo(update, context, graph)
     else:
         send_message(update, context, parser.error)
     return TRENDS
 
+
 # Always active handlers
 start_handler = CommandHandler('start', cb_start)
 stop_handler = CommandHandler('stop', cb_stop)
-
 
 conversation = ConversationHandler(
     entry_points=[
