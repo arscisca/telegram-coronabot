@@ -1,8 +1,13 @@
 import logging
 
+import telegram
 from telegram import Update
 from telegram.ext import CallbackContext
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
+
+import core
+import constants
+MARKDOWN = telegram.parsemode.ParseMode.MARKDOWN
 
 # Conversation states
 HOME, TRENDS, REPORTS, ERROR = range(4)
@@ -25,7 +30,7 @@ def send_photo(update: Update, context: CallbackContext, photo, **kwargs):
     Args:
         update (Update)
         context (CallbackContext)
-        photo (file): textual message to be sent
+        photo (file-like): textual message to be sent
         **kwargs: arbitrary keyword arguments
     """
     context.bot.send_photo(update.effective_chat.id, photo, **kwargs)
@@ -64,7 +69,7 @@ def cb_prompt_start(update: Update, context: CallbackContext):
 
 def cb_start(update: Update, context: CallbackContext):
     """Start the conversation"""
-    cb_not_implemented(update, context)
+    send_message(update, context, "Benvenuto", parse_mode=MARKDOWN)
     return HOME
 
 
@@ -88,31 +93,83 @@ def cb_info(update: Update, context: CallbackContext):
 
 
 # Reports state
+def cb_report(update: Update, context: CallbackContext):
+    """"""
+    send_message(update, context, "Quale report?")
+    return REPORTS
+
+
 def cb_reports_help(update: Update, context: CallbackContext):
     """Help for the REPORTS state"""
     cb_not_implemented(update, context)
     return REPORTS
 
 
+def cb_report_request(update: Update, context: CallbackContext):
+    """Process a full report request"""
+    request = update.message.text.lower()
+    parser = core.ReportRequestParser()
+    parser.parse(request)
+    if parser.status is True:
+        location, date = parser.result
+        report = core.get_report(location, date) + f"\n{constants.bot_username}"
+        send_message(update, context, report, parse_mode=MARKDOWN)
+    else:
+        send_message(update, context, parser.error)
+    return REPORTS
+
+
 # Trends state
+def cb_trends(update: Update, context: CallbackContext):
+    """Trends state"""
+    send_message(update, context, "Che trends?")
+    return TRENDS
+
+
 def cb_trends_help(update: Update, context: CallbackContext):
     """Help for the TRENDS state"""
     cb_not_implemented(update, context)
     return TRENDS
 
 
+def cb_trends_request(update: Update, context: CallbackContext):
+    """Process a trend request"""
+    request = update.message.text.lower()
+    parser = core.TrendRequestParser()
+    parser.parse(request)
+    if parser.status is True:
+        stat, location, interval = parser.result
+        graph = core.plot_trend(stat, location, interval)
+        send_photo(update, context, graph)
+    else:
+        send_message(update, context, parser.error)
+    return TRENDS
+
+# Always active handlers
+start_handler = CommandHandler('start', cb_start)
+stop_handler = CommandHandler('stop', cb_stop)
+
+
 conversation = ConversationHandler(
     entry_points=[
-        CommandHandler('start', cb_start),
+        start_handler,
         MessageHandler(Filters.all, cb_prompt_start)
     ],
     states={
         HOME: [
             CommandHandler('help', cb_home_help),
-            MessageHandler(Filters.text('Aiuto'), cb_home_help)
+            MessageHandler(Filters.text('Aiuto'), cb_home_help),
+            MessageHandler(Filters.text('Report'), cb_report),
+            MessageHandler(Filters.text('Trend'), cb_trends)
         ],
-        REPORTS: [],
-        TRENDS: []
+        REPORTS: [
+            CommandHandler('help', cb_reports_help),
+            MessageHandler(Filters.regex(".*?(?:,.*)?"), cb_report_request)
+        ],
+        TRENDS: [
+            CommandHandler('help', cb_trends_help),
+            MessageHandler(Filters.regex(constants.trend_request), cb_trends_request)
+        ]
     },
-    fallbacks=[]
+    fallbacks=[start_handler, stop_handler]
 )
