@@ -70,7 +70,18 @@ def cb_prompt_start(update: Update, context: CallbackContext):
 
 def cb_start(update: Update, context: CallbackContext):
     """Start the conversation"""
-    send_message(update, context, "Benvenuto", parse_mode=MARKDOWN)
+    keyboard = telegram.ReplyKeyboardMarkup(
+        [['Aiuto', 'Info'],
+         ['Report'],
+         ['Andamento']],
+        one_time_keyboard=True
+    )
+    send_message(update, context,
+                 "Benvenuto! Sono un *bot* pensato per raccogliere e mostrare i dati e le statistiche dell'infezione "
+                 "del *SARS-CoV-2* in *Italia* in maniera semplice e diretta."
+                 "\n\nSeleziona una funzione.\n\n_Ricorda che in qualsiasi momento puoi consultare il comando /help dove "
+                 "puoi ottenere informazioni sulle azioni disponibili e sui formati delle richieste._",
+                 reply_markup=keyboard, parse_mode=MARKDOWN)
     return HOME
 
 
@@ -83,7 +94,17 @@ def cb_stop(update: Update, context: CallbackContext):
 # Home state
 def cb_home_help(update: Update, context: CallbackContext):
     """Help for the HOME state"""
-    cb_not_implemented(update, context)
+    send_message(update, context,
+                 "Invia un messaggio contenente una delle seguenti azioni:\n"
+                 " *Aiuto*: visualizza questo messaggio di aiuto\n"
+                 " *Info*: ricevi informazioni sul bot, sulle fonti e sull'autore\n"
+                 " *Report*: ottieni un report completo su una località ed una data a scelta\n"
+                 " *Trend*: visualizza i grafici e gli andamenti dell'infezione in località e periodi a scelta.\n"
+                 "\nPer selezionare un'azione puoi anche utilizzare la tastiera alternativa che, se non si è aperta "
+                 "in automatico, può essere aperta dal pulsante con i quattro quadretti a fianco della barra del "
+                 "testo.",
+                 parse_mode=MARKDOWN
+                 )
     return HOME
 
 
@@ -95,8 +116,17 @@ def cb_info(update: Update, context: CallbackContext):
 
 # Reports state
 def cb_report(update: Update, context: CallbackContext):
-    """"""
-    send_message(update, context, "Quale report?")
+    """Show a full report"""
+    send_message(
+        update, context,
+        "Manda un messaggio contenente il *luogo* e la *data* di tuo interesse separati da una virgola come nei "
+        "seguenti esempi:\n"
+        "  Roma, ieri\n"
+        "  Piemonte, 1 Giugno 2020\n"
+        "  Italia, 08/08/2020\n\n"
+        "_Consulta /help per più informazioni sui report e come scrivere la tua richiesta_",
+        parse_mode=MARKDOWN
+    )
     return REPORTS
 
 
@@ -113,7 +143,7 @@ def cb_report_request(update: Update, context: CallbackContext):
     parser.parse(request)
     if parser.status is True:
         location, date = parser.result
-        report = core.get_report(location, date) + f"\n{constants.bot_username}"
+        report = core.get_report(location, date)
         send_message(update, context, report, parse_mode=MARKDOWN)
     else:
         send_message(update, context, parser.error)
@@ -172,11 +202,11 @@ conversation = ConversationHandler(
             CommandHandler('help', cb_home_help),
             MessageHandler(Filters.text('Aiuto'), cb_home_help),
             MessageHandler(Filters.text('Report'), cb_report),
-            MessageHandler(Filters.text('Trend'), cb_trends)
+            MessageHandler(Filters.text('Andamento'), cb_trends)
         ],
         REPORTS: [
             CommandHandler('help', cb_reports_help),
-            MessageHandler(Filters.regex(".*?(?:,.*)?"), cb_report_request)
+            MessageHandler(Filters.regex(constants.report_request), cb_report_request)
         ],
         TRENDS: [
             CommandHandler('help', cb_trends_help),

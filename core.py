@@ -171,7 +171,7 @@ class InfectionDataset:
         )
         # Filter dataframe by date and location
         dataframe = dataframe[[date in interval for date in dataframe['data']]]
-        if location.level == 'region':
+        if location.level == 'regione':
             dataframe = dataframe[dataframe['denominazione_regione'] == str(location)]
         elif location.level == 'provincia':
             dataframe = dataframe[dataframe['denominazione_provincia'] == str(location)]
@@ -337,7 +337,8 @@ class DateParser(Parser):
 
     def make_error_message(self, error, string):
         return f"Non riconosco '{error.args[0]}' come una data valida. Prova ad utilizzare termini più semplici, " \
-               f"come 'oggi', 'ieri', oppure insirisci la data per esteso come in '18 Luglio 2020'."
+               f"come 'oggi', 'ieri', oppure insirisci la data per esteso come in '18 Luglio 2020'.\n\n" \
+               f"Consulta /help per ulteriori informazioni."
 
 
 class IntervalParser(ComposedParser):
@@ -369,8 +370,8 @@ class LocationParser(Parser):
 
     def make_error_message(self, error, string):
         #TODO: suggest similar locations
-        return f"Non riconosco '{string}' come un luogo valido. Prova con il nome di una provincia, di una regione o" \
-               f"con 'Italia'."
+        return f"Non riconosco '{string}' come un luogo valido. Prova con il nome di una provincia, di una regione o " \
+               f"con 'Italia'.\n\nConsulta /help per ulteriori informazioni."
 
 
 class StatParser(Parser):
@@ -405,6 +406,10 @@ class TrendRequestParser(ComposedParser):
 
     def split(self, string):
         _, stat, location, interval, _ = re.split(TrendRequestParser.REQUEST_PATTERN, string)
+        if location is None:
+            location = 'italia'
+        if interval is None:
+            interval = '24/02/2020 - oggi'
         return stat, location, interval
 
 
@@ -431,13 +436,14 @@ def get_report(location, date):
     try:
         dataset = InfectionDataset.download(location, dummy_interval)
     except HTTPError:
-        return f"Sembra che non ci siano dati sul {date.strftime('%d/%m/%Y')}. Prova con un'altra data, " \
-               f"un altro luogo, oppure consulta /help."
+        return f"Non ci sono dati per '{location}' in data {date.strftime('%d/%m/%Y')}. Prova con un'altra data, " \
+               f"un altro luogo. Consulta il comando /help per ulteriori informazioni."
     report = f"*{location}* - {date.strftime('%d/%m/%Y')}:\n"
     for stat in sorted(dataset.stats):
         stat_name = stat.replace('_', ' ').capitalize()
         number = readable_number(dataset.get_data(stat, dummy_interval)[0])
         report += f"  _{stat_name}_: {number}\n"
+    report += f"\nReport generato da {constants.bot_username}"
     return report
 
 
@@ -448,7 +454,7 @@ def plot_trend(stat, location, interval):
         values = dataset[stat]
     else:
         raise KeyError(dataset.stats)
-    return plot(dates, values, location=location, stat=stat)
+    return plot(dates, values, location=location, stat=stat.replace('_', ' '))
 
 
 def plot(dates, values, **kwargs):
