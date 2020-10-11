@@ -9,6 +9,7 @@ import core
 import constants
 
 MARKDOWN = telegram.parsemode.ParseMode.MARKDOWN
+MARKDOWN_V2 = telegram.parsemode.ParseMode.MARKDOWN_V2
 
 # Conversation states
 HOME, TRENDS, REPORTS, ERROR = range(4)
@@ -63,6 +64,12 @@ def cb_not_implemented(update: Update, context: CallbackContext):
     raise NotImplementedError("Handler not implemented")
 
 
+def cb_unknown_request(update: Update, context: CallbackContext):
+    """User request unknown"""
+    send_message(update, context,
+                 "Non riesco a capire la tua richiesta. Prova a consultare /help per più informazioni.")
+
+
 def cb_prompt_start(update: Update, context: CallbackContext):
     """Prompt the start of the conversation when bot is inactive."""
     send_message(update, context, "La conversazione non è attiva. Digita /start per avviarla.")
@@ -79,8 +86,9 @@ def cb_start(update: Update, context: CallbackContext):
     send_message(update, context,
                  "Benvenuto! Sono un *bot* pensato per raccogliere e mostrare i dati e le statistiche dell'infezione "
                  "del *SARS-CoV-2* in *Italia* in maniera semplice e diretta."
-                 "\n\nSeleziona una funzione.\n\n_Ricorda che in qualsiasi momento puoi consultare il comando /help dove "
-                 "puoi ottenere informazioni sulle azioni disponibili e sui formati delle richieste._",
+                 "\n\nSeleziona una funzione.\n\n_Ricorda che in qualsiasi momento puoi consultare il "
+                 "comando /help dove puoi ottenere informazioni sulle azioni disponibili e sui formati delle "
+                 "richieste._",
                  reply_markup=keyboard, parse_mode=MARKDOWN)
     return HOME
 
@@ -110,7 +118,14 @@ def cb_home_help(update: Update, context: CallbackContext):
 
 def cb_info(update: Update, context: CallbackContext):
     """Send info about the bot"""
-    cb_not_implemented(update, context)
+    send_message(update, context,
+                 "Questo è un bot _open source_ pensato per  raccogliere e mostrare i dati e le statistiche "
+                 "dell'infezione del *SARS-CoV-2* in *Italia* in maniera semplice e diretta.\n\n"
+                 " _Autore_: Alessandro Rocco Scisca\n"
+                 " _Codice_: [GitHub](https://github.com/shishka0/telegram-coronabot)]\n"
+                 "Tutti i dati sono scaricati in tempo reale dalla "
+                 "[repository ufficiale](https://github.com/pcm-dpc/COVID-19) della Protezione Civile Italiana.",
+                 parse_mode=MARKDOWN)
     return HOME
 
 
@@ -119,8 +134,8 @@ def cb_report(update: Update, context: CallbackContext):
     """Show a full report"""
     send_message(
         update, context,
-        "Manda un messaggio contenente il *luogo* e la *data* di tuo interesse separati da una virgola come nei "
-        "seguenti esempi:\n"
+        "Qui puoi richiedere un report giornaliero completo.\n"
+        "Manda un messaggio contenente il *luogo* e la *data* di tuo interesse separati da una virgola come in:\n"
         "  Roma, ieri\n"
         "  Piemonte, 1 Giugno 2020\n"
         "  Italia, 08/08/2020\n\n"
@@ -132,7 +147,12 @@ def cb_report(update: Update, context: CallbackContext):
 
 def cb_reports_help(update: Update, context: CallbackContext):
     """Help for the REPORTS state"""
-    cb_not_implemented(update, context)
+    send_message(update, context,
+                 "Manda un messaggio contenente il nome di una provincia, di una regione o semplicemente 'Italia' "
+                 "seguito dalla data di tuo interesse separati da una virgola.\n"
+                 "La data non deve avere un formato particolare e puoi usare parole come 'oggi', 'ieri', "
+                 "'settimana scorsa'",
+                 parse_mode=MARKDOWN)
     return REPORTS
 
 
@@ -153,13 +173,37 @@ def cb_report_request(update: Update, context: CallbackContext):
 # Trends state
 def cb_trends(update: Update, context: CallbackContext):
     """Trends state"""
-    send_message(update, context, "Che trends?")
+    send_message(update, context,
+                 "Qui puoi visualizzare gli andamenti statistici dell'infezione. Invia un messaggio contenente "
+                 "la *statistica*, il *luogo* e il *periodo* di tuo interesse separati da virgole come in:\n"
+                 "  Dimessi guariti, Lazio, 1 settembre - 1 ottobre\n"
+                 "  Tamponi, Sicilia, settimana scorsa - oggi\n\n"
+                 "_Consulta /help per ulteriori informazioni sul formato del messaggio e per una lista completa "
+                 "delle statistiche disponibili._",
+                 parse_mode=MARKDOWN
+                 )
     return TRENDS
 
 
 def cb_trends_help(update: Update, context: CallbackContext):
     """Help for the TRENDS state"""
-    cb_not_implemented(update, context)
+    stats = sorted(map(lambda s: s.replace('_', ' ').capitalize(), constants.stats.keys()))
+    send_message(update, context,
+                 "Invia un messaggio contenente la *statistica*, il *luogo* e il *periodo* di tuo interesse "
+                 "separati da virgole\\.\n"
+                 "Trovi la lista delle statistiche disponibili al fondo di questo messaggio\\. Il luogo può essere "
+                 "il nome di una provincia, di una regione oppure semplicemente 'Italia'\\. Il periodo deve essere "
+                 "composto da due date \\(\"ultima settimana\" non sarà accettato\\) separate da un trattino \\(\\-\\"
+                 ")\\.\n"
+                 "Evita di usare articoli come in '~il~ 3 maggio \\- ~il~ 3 aprile'\\.\n\n"
+                 "È possibile omettere il luogo e la data\\. Omettendo il luogo saranno mostrati i dati relativi "
+                 "all'Italia, omettendo la data saranno mostrati tutti i dati disponibili\\.\n\n"
+                 "Ricorda che i dati ufficiali disponibili per le province sono diversi rispetto ai dati disponibili "
+                 "al livello regionale e nazionale\\.\n\n"
+                 "Complessivamente, i dati disponibili sono: "
+                 f"{', '.join(stats)}",
+                 parse_mode=MARKDOWN_V2
+                 )
     return TRENDS
 
 
@@ -201,6 +245,7 @@ conversation = ConversationHandler(
         HOME: [
             CommandHandler('help', cb_home_help),
             MessageHandler(Filters.text('Aiuto'), cb_home_help),
+            MessageHandler(Filters.text('Info'), cb_info),
             MessageHandler(Filters.text('Report'), cb_report),
             MessageHandler(Filters.text('Andamento'), cb_trends)
         ],
@@ -213,5 +258,5 @@ conversation = ConversationHandler(
             MessageHandler(Filters.regex(constants.trend_request), cb_trends_request)
         ]
     },
-    fallbacks=[start_handler, stop_handler]
+    fallbacks=[start_handler, stop_handler, MessageHandler(Filters.all, cb_unknown_request)]
 )

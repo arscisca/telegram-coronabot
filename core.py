@@ -346,10 +346,8 @@ class IntervalParser(ComposedParser):
         super(IntervalParser, self).__init__([DateParser, DateParser])
 
     def split(self, string):
-        #TODO: improve interval recognition
-        sdate, edate = string.split('-')
-        sdate = sdate.strip()
-        edate = edate.strip()
+        _, interval, _ = re.split(f"({constants.interval})", string)
+        _, sdate, edate, _ = re.split(fr"({constants.date})\s?-\s?({constants.date})", interval)
         return [sdate, edate]
 
     def reduce(self, partial_results):
