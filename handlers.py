@@ -70,6 +70,12 @@ def cb_unknown_request(update: Update, context: CallbackContext):
                  "Non riesco a capire la tua richiesta. Prova a consultare /help per più informazioni.")
 
 
+def cb_timeout(update: Update, context: CallbackContext):
+    """Chat timeout"""
+    send_message(update, context,
+                 "")
+
+
 def cb_prompt_start(update: Update, context: CallbackContext):
     """Prompt the start of the conversation when bot is inactive."""
     send_message(update, context, "La conversazione non è attiva. Digita /start per avviarla.")
@@ -100,6 +106,22 @@ def cb_stop(update: Update, context: CallbackContext):
 
 
 # Home state
+def cb_home(update: Update, context: CallbackContext):
+    """Return to home"""
+    keyboard = telegram.ReplyKeyboardMarkup(
+        [['Aiuto', 'Info'],
+         ['Report'],
+         ['Andamento']],
+        one_time_keyboard=True
+    )
+    send_message(update, context,
+                 "Seleziona una funzione.\n\n_Ricorda che in qualsiasi momento puoi consultare il "
+                 "comando /help dove puoi ottenere informazioni sulle azioni disponibili e sui formati delle "
+                 "richieste._",
+                 reply_markup=keyboard, parse_mode=MARKDOWN)
+    return HOME
+
+
 def cb_home_help(update: Update, context: CallbackContext):
     """Help for the HOME state"""
     send_message(update, context,
@@ -121,8 +143,8 @@ def cb_info(update: Update, context: CallbackContext):
     send_message(update, context,
                  "Questo è un bot _open source_ pensato per  raccogliere e mostrare i dati e le statistiche "
                  "dell'infezione del *SARS-CoV-2* in *Italia* in maniera semplice e diretta.\n\n"
-                 " _Autore_: Alessandro Rocco Scisca\n"
-                 " _Codice_: [GitHub](https://github.com/shishka0/telegram-coronabot)]\n"
+                 " _Autore_: Alessandro R. Scisca\n"
+                 " _Codice_: [GitHub](https://github.com/shishka0/telegram-coronabot)\n"
                  "Tutti i dati sono scaricati in tempo reale dalla "
                  "[repository ufficiale](https://github.com/pcm-dpc/COVID-19) della Protezione Civile Italiana.",
                  parse_mode=MARKDOWN)
@@ -163,7 +185,8 @@ def cb_report_request(update: Update, context: CallbackContext):
     parser.parse(request)
     if parser.status is True:
         location, date = parser.result
-        report = core.get_report(location, date)
+        report = core.get_report(location, date) + "\n\n_Manda un'altra richiesta oppure utilizza /home per tornare " \
+                                                   "nel menu principale._"
         send_message(update, context, report, parse_mode=MARKDOWN)
     else:
         send_message(update, context, parser.error)
@@ -226,7 +249,10 @@ def cb_trends_request(update: Update, context: CallbackContext):
                 f"{available_stats}."
             )
             return
-        send_photo(update, context, graph)
+        send_photo(update, context, graph,
+                   caption=f"Grafico generato da {constants.bot_username}.\n\n"
+                           f"_Manda un'altra richiesta oppure utilizza /home per tornare al menu principale._",
+                   parse_mode=MARKDOWN)
     else:
         send_message(update, context, parser.error)
     return TRENDS
@@ -258,5 +284,9 @@ conversation = ConversationHandler(
             MessageHandler(Filters.regex(constants.trend_request), cb_trends_request)
         ]
     },
-    fallbacks=[start_handler, stop_handler, MessageHandler(Filters.all, cb_unknown_request)]
+    fallbacks=[
+        start_handler,
+        stop_handler,
+        CommandHandler('home', cb_home),
+        MessageHandler(Filters.all, cb_unknown_request)]
 )
