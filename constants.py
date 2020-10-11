@@ -15,12 +15,15 @@ with open('assets/stats.json', 'r') as f:
 
 # Patterns
 location = r"[a-z][a-z \-']*?"
-date = r"(?:[0-9]+[a-z0-9 \-\\/]+?(?:[0-9]{2,4})?|[a-z' ]+?)"
-interval = date + r"\s?-\s?" + date
+date = r"(?:" \
+       r"[0-9]{1,2}[\s/\\](?:[a-z]+|[0-9]{1,2})(?:[\s/\\][0-9]{2,4})?|" \
+       r"[a-z' ]+" \
+       r")"
+interval = date + r" - " + date
 stat = r"[a-z ]+"
 
 report_request = re.compile(
-    "^(" + location + r")(?:,\s?(" + date + "))?$", re.IGNORECASE
+    "^(" + location + r")(?:,\s?[a-z' ]*?(" + date + "))?$", re.IGNORECASE
 )
 trend_request = re.compile(
     "^(" + stat + ")" + r"(?:,\s?(" + location + "))?" + r"(?:,\s?(" + interval + "))?$", re.IGNORECASE
