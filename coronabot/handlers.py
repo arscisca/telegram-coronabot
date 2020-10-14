@@ -7,6 +7,8 @@ from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Fi
 
 import coronabot.core as core
 import coronabot.constants as constants
+import coronabot.parse as parse
+
 
 MARKDOWN = telegram.parsemode.ParseMode.MARKDOWN
 MARKDOWN_V2 = telegram.parsemode.ParseMode.MARKDOWN_V2
@@ -181,7 +183,7 @@ def cb_reports_help(update: Update, context: CallbackContext):
 def cb_report_request(update: Update, context: CallbackContext):
     """Process a full report request"""
     request = update.message.text.lower()
-    parser = core.ReportRequestParser()
+    parser = parse.ReportRequestParser()
     parser.parse(request)
     if parser.status is True:
         location, date = parser.result
@@ -233,7 +235,7 @@ def cb_trends_help(update: Update, context: CallbackContext):
 def cb_trends_request(update: Update, context: CallbackContext):
     """Process a trend request"""
     request = update.message.text.lower()
-    parser = core.TrendRequestParser()
+    parser = parse.TrendRequestParser()
     parser.parse(request)
     if parser.status is True:
         stat, location, interval = parser.result
