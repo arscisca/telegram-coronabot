@@ -1,9 +1,9 @@
 import re
 import dateparser
 
-import coronabot.constants as constants
-import coronabot.location as location
-import coronabot.dateinterval as dateinterval
+import constants
+import location
+import dateinterval
 
 
 class Parser:

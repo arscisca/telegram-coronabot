@@ -12,8 +12,8 @@ import tempfile
 
 from urllib.error import HTTPError
 
-import coronabot.constants as constants
-import coronabot.dateinterval as dateinterval
+import constants
+import dateinterval
 
 matplotlib.use('agg')
 plt.style.use('dark_background')
