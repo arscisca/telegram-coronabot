@@ -14,7 +14,7 @@ import tempfile
 
 from urllib.error import HTTPError
 
-import constants
+import coronabot.constants as constants
 
 matplotlib.use('agg')
 plt.style.use('dark_background')

@@ -5,8 +5,8 @@ from telegram import Update
 from telegram.ext import CallbackContext
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
 
-import core
-import constants
+import coronabot.core as core
+import coronabot.constants as constants
 
 MARKDOWN = telegram.parsemode.ParseMode.MARKDOWN
 MARKDOWN_V2 = telegram.parsemode.ParseMode.MARKDOWN_V2

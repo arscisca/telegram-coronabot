@@ -2,13 +2,13 @@ import sys
 import logging
 from telegram.ext import Updater
 
-import handlers
+import coronabot.handlers as handlers
 
 
 def main(token):
     """Main function"""
     # Setup logging
-    logging.basicConfig(filename='logs/backend.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    logging.basicConfig(filename='../logs/backend.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
     # Initialize bot
     updater = Updater(token=token, use_context=True)

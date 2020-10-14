@@ -3,14 +3,14 @@ import re
 
 bot_username = r'@Italia\_CoronaBot'
 
-with open('assets/locations.json', 'r') as f:
+with open('../assets/locations.json', 'r') as f:
     locations = json.load(f)
     country = locations['country']
     regions = set(locations['regions'])
     provinces = set(locations['provinces'])
     location_aliases = locations['aliases']
 
-with open('assets/stats.json', 'r') as f:
+with open('../assets/stats.json', 'r') as f:
     stats = json.load(f)
 
 # Patterns
