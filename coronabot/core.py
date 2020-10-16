@@ -174,6 +174,7 @@ def plot(dates, values, **kwargs):
     fig, ax = plt.subplots()
     style = stylize_plot(fig, ax, npoints=len(values), **kwargs)
     ax.plot_date(dates, values, **style)
+    ax.fill_between(dates, values, np.min(values), color=style['color'], alpha=0.3)
     # Make temporary file
     temp_file = tempfile.NamedTemporaryFile(mode='w+b', prefix='plot-', suffix='.png', delete=True)
     plt.savefig(temp_file, bbox_inches='tight')
@@ -203,7 +204,7 @@ def stylize_plot(fig, ax, **kwargs):
         matplotlib.dates.AutoDateLocator()
     ))
     ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(
-        lambda x, p: readable_number(x)
+        lambda x, p: readable_number(int(x))
     ))
     # Labels and title
     xlabel = 'Data'
@@ -211,5 +212,5 @@ def stylize_plot(fig, ax, **kwargs):
     title = f"{location}: {ylabel}"
     ax.set_xlabel(xlabel, color='slateblue')
     ax.set_ylabel(ylabel, color='slateblue')
-    ax.set_title(title)
+    ax.set_title(title, color=color)
     return style
