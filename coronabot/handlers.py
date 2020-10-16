@@ -155,7 +155,7 @@ def cb_report(update: Update, context: CallbackContext):
         update, context,
         "Quale *report* vuoi consultare? "
         "Rispondi con il *luogo* e la *data* di tuo interesse separati da una virgola, come in: 'Roma, ieri'.\n\n"
-        "_Usa /help per più informazioni ed esempi._",
+        "_Usa /help per informazioni ed esempi._",
         parse_mode=MARKDOWN
     )
     return REPORTS
@@ -164,7 +164,8 @@ def cb_report(update: Update, context: CallbackContext):
 def cb_reports_help(update: Update, context: CallbackContext):
     """Help for the REPORTS state"""
     send_message(update, context,
-                 "Rispondi con un messaggio contenente il *luogo* e la *data* di tuo interesse.\n\n"
+                 "Rispondi con un messaggio contenente il *luogo* e la *data* di tuo interesse separati da una "
+                 "virgola.\n\n"
                  "*FORMATO*\n"
                  "-*Luogo*: il nome di una *provincia*, *regione* o *Italia*.\n"
                  "-*Data*: la data del report che vuoi visualizzare. Puoi scriverla in formato numerico (20/09/2020), "
