@@ -174,6 +174,7 @@ def plot(dates, values, **kwargs):
     fig, ax = plt.subplots()
     style = stylize_plot(fig, ax, npoints=len(values), **kwargs)
     ax.plot_date(dates, values, **style)
+    ax.fill_between(dates, values, np.min(values), color=style['color'], alpha=0.3)
     # Make temporary file
     temp_file = tempfile.NamedTemporaryFile(mode='w+b', prefix='plot-', suffix='.png', delete=True)
     plt.savefig(temp_file, bbox_inches='tight')
@@ -190,9 +191,12 @@ def stylize_plot(fig, ax, **kwargs):
     Return
         dict: keyword arguments to be used in plotting function
     """
+    stat = kwargs.get('stat', '???')
+    column = stat.replace(' ', '_')
+    location = kwargs.get('location', '???')
     # Line style
     data_marker = '.' if kwargs.get('npoints', 14) < 14 else ''
-    color = 'r'
+    color = constants.stats[column]['style']['color'] if column in constants.stats else 'red'
     style = {'marker': data_marker, 'linestyle': '-', 'color': color}
     # Image style
     ax.grid(which='both', color='lightslategray')
@@ -200,14 +204,13 @@ def stylize_plot(fig, ax, **kwargs):
         matplotlib.dates.AutoDateLocator()
     ))
     ax.get_yaxis().set_major_formatter(matplotlib.ticker.FuncFormatter(
-        lambda x, p: readable_number(x)
+        lambda x, p: readable_number(int(x))
     ))
     # Labels and title
     xlabel = 'Data'
-    ylabel = kwargs.get('stat', '???').capitalize()
-    location = kwargs.get('location', '???')
+    ylabel = stat.capitalize()
     title = f"{location}: {ylabel}"
     ax.set_xlabel(xlabel, color='slateblue')
     ax.set_ylabel(ylabel, color='slateblue')
-    ax.set_title(title)
+    ax.set_title(title, color=color)
     return style
