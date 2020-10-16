@@ -1,16 +1,72 @@
 {
-  "ricoverati_con_sintomi": {},
-  "terapia_intensiva": {},
-  "totale_ospedalizzati": {},
-  "isolamento_domiciliare": {},
-  "totale_positivi": {},
-  "variazione_totale_positivi": {},
-  "nuovi_positivi": {},
-  "dimessi_guariti": {},
-  "deceduti": {},
-  "casi_da_sospetto diagnostico": {},
-  "casi_da_screening": {},
-  "totale_casi": {},
-  "tamponi": {},
-  "casi_testati": {}
+  "ricoverati_con_sintomi": {
+    "style": {
+      "color": "orange"
+    }
+  },
+  "terapia_intensiva": {
+    "style": {
+      "color": "royalblue"
+    }
+  },
+  "totale_ospedalizzati": {
+    "style": {
+      "color": "violet"
+    }
+  },
+  "isolamento_domiciliare": {
+    "style": {
+      "color": "gold"
+    }
+  },
+  "totale_positivi": {
+    "style": {
+      "color": "red"
+    }
+  },
+  "variazione_totale_positivi": {
+    "style": {
+      "color": "lavender"
+    }
+  },
+  "nuovi_positivi": {
+    "style": {
+      "color": "crimson"
+    }
+  },
+  "dimessi_guariti": {
+    "style": {
+      "color": "lime"
+    }
+  },
+  "deceduti": {
+    "style": {
+      "color": "lightslategrey"
+    }
+  },
+  "casi_da_sospetto_diagnostico": {
+    "style": {
+      "color": "cyan"
+    }
+  },
+  "casi_da_screening": {
+    "style": {
+      "color": "mediumslateblue"
+    }
+  },
+  "totale_casi": {
+    "style": {
+      "color": "red"
+    }
+  },
+  "tamponi": {
+    "style": {
+      "color": "forestgreen"
+    }
+  },
+  "casi_testati": {
+    "style": {
+      "color": "darkorange"
+    }
+  }
 }
