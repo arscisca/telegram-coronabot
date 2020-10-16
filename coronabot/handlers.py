@@ -93,10 +93,8 @@ def cb_start(update: Update, context: CallbackContext):
     )
     send_message(update, context,
                  "Benvenuto! Sono un *bot* pensato per raccogliere e mostrare i dati e le statistiche dell'infezione "
-                 "del *SARS-CoV-2* in *Italia* in maniera semplice e diretta."
-                 "\n\nSeleziona una funzione.\n\n_Ricorda che in qualsiasi momento puoi consultare il "
-                 "comando /help dove puoi ottenere informazioni sulle azioni disponibili e sui formati delle "
-                 "richieste._",
+                 "del *SARS-CoV-2* in *Italia* in maniera semplice e diretta.\n\n"
+                 "Cosa posso fare per te? _Utilizza la tastiera alternativa o digita /help per più informazioni._",
                  reply_markup=keyboard, parse_mode=MARKDOWN)
     return HOME
 
@@ -117,9 +115,7 @@ def cb_home(update: Update, context: CallbackContext):
         one_time_keyboard=True
     )
     send_message(update, context,
-                 "Seleziona una funzione.\n\n_Ricorda che in qualsiasi momento puoi consultare il "
-                 "comando /help dove puoi ottenere informazioni sulle azioni disponibili e sui formati delle "
-                 "richieste._",
+                 "Cosa posso fare per te? _Utilizza la tastiera alternativa o digita /help per più informazioni._",
                  reply_markup=keyboard, parse_mode=MARKDOWN)
     return HOME
 
@@ -127,14 +123,13 @@ def cb_home(update: Update, context: CallbackContext):
 def cb_home_help(update: Update, context: CallbackContext):
     """Help for the HOME state"""
     send_message(update, context,
-                 "Invia un messaggio contenente una delle seguenti azioni:\n"
-                 " *Aiuto*: visualizza questo messaggio di aiuto\n"
-                 " *Info*: ricevi informazioni sul bot, sulle fonti e sull'autore\n"
-                 " *Report*: ottieni un report completo su una località ed una data a scelta\n"
-                 " *Trend*: visualizza i grafici e gli andamenti dell'infezione in località e periodi a scelta.\n"
-                 "\nPer selezionare un'azione puoi anche utilizzare la tastiera alternativa che, se non si è aperta "
-                 "in automatico, può essere aperta dal pulsante con i quattro quadretti a fianco della barra del "
-                 "testo.",
+                 "Invia un messaggio contenente una delle seguenti parole chiave:\n"
+                 "-*Aiuto*: visualizza questo messaggio di aiuto\n"
+                 "-*Info*: ricevi informazioni sul bot, sulle fonti e sull'autore\n"
+                 "-*Report*: ottieni un report completo su una località ed una data a scelta\n"
+                 "-*Trend*: visualizza i grafici e gli andamenti dell'infezione in località e periodi a scelta.\n"
+                 "\nPer selezionare un'azione puoi anche utilizzare la *tastiera alternativa* che "
+                 "puoi aprire dal pulsante con i quattro quadretti a fianco della barra del testo.",
                  parse_mode=MARKDOWN
                  )
     return HOME
@@ -145,8 +140,8 @@ def cb_info(update: Update, context: CallbackContext):
     send_message(update, context,
                  "Questo è un bot _open source_ pensato per  raccogliere e mostrare i dati e le statistiche "
                  "dell'infezione del *SARS-CoV-2* in *Italia* in maniera semplice e diretta.\n\n"
-                 " _Autore_: Alessandro R. Scisca\n"
-                 " _Codice_: [GitHub](https://github.com/shishka0/telegram-coronabot)\n"
+                 "-_Autore_: Alessandro R. Scisca\n"
+                 "-_Codice_: [GitHub](https://github.com/shishka0/telegram-coronabot)\n"
                  "Tutti i dati sono scaricati in tempo reale dalla "
                  "[repository ufficiale](https://github.com/pcm-dpc/COVID-19) della Protezione Civile Italiana.",
                  parse_mode=MARKDOWN)
@@ -158,12 +153,9 @@ def cb_report(update: Update, context: CallbackContext):
     """Show a full report"""
     send_message(
         update, context,
-        "Qui puoi richiedere un report giornaliero completo.\n"
-        "Manda un messaggio contenente il *luogo* e la *data* di tuo interesse separati da una virgola come in:\n"
-        "  Roma, ieri\n"
-        "  Piemonte, 1 Giugno 2020\n"
-        "  Italia, 08/08/2020\n\n"
-        "_Consulta /help per più informazioni sui report e come scrivere la tua richiesta_",
+        "Quale *report* vuoi consultare? "
+        "Rispondi con il *luogo* e la *data* di tuo interesse separati da una virgola, come in: 'Roma, ieri'.\n\n"
+        "_Usa /help per più informazioni ed esempi._",
         parse_mode=MARKDOWN
     )
     return REPORTS
@@ -172,10 +164,16 @@ def cb_report(update: Update, context: CallbackContext):
 def cb_reports_help(update: Update, context: CallbackContext):
     """Help for the REPORTS state"""
     send_message(update, context,
-                 "Manda un messaggio contenente il nome di una provincia, di una regione o semplicemente 'Italia' "
-                 "seguito dalla data di tuo interesse separati da una virgola.\n"
-                 "La data non deve avere un formato particolare e puoi usare parole come 'oggi', 'ieri', "
-                 "'settimana scorsa'",
+                 "Rispondi con un messaggio contenente il *luogo* e la *data* di tuo interesse.\n\n"
+                 "*FORMATO*\n"
+                 "-*Luogo*: il nome di una *provincia*, *regione* o *Italia*.\n"
+                 "-*Data*: la data del report che vuoi visualizzare. Puoi scriverla in formato numerico (20/09/2020), "
+                 "per esteso (18 luglio) o a parole (ieri, settimana scorsa, mese scorso).\n\n"
+                 "Puoi omettere la data per ricevere il report di oggi (che potrebbe non essere ancora uscito!).\n\n"
+                 "*ESEMPI*\n"
+                 " Italia, ieri\n"
+                 " Lombardia, 1 Ottobre\n"
+                 " Roma, 08/08/2020",
                  parse_mode=MARKDOWN)
     return REPORTS
 
@@ -187,7 +185,7 @@ def cb_report_request(update: Update, context: CallbackContext):
     parser.parse(request)
     if parser.status is True:
         location, date = parser.result
-        report = core.get_report(location, date) + "\n\n_Manda un'altra richiesta oppure utilizza /home per tornare " \
+        report = core.get_report(location, date) + "\n\n_Cerca un altro report oppure digita /home per tornare " \
                                                    "nel menu principale._"
         send_message(update, context, report, parse_mode=MARKDOWN)
     else:
@@ -199,12 +197,10 @@ def cb_report_request(update: Update, context: CallbackContext):
 def cb_trends(update: Update, context: CallbackContext):
     """Trends state"""
     send_message(update, context,
-                 "Qui puoi visualizzare gli andamenti statistici dell'infezione. Invia un messaggio contenente "
-                 "la *statistica*, il *luogo* e il *periodo* di tuo interesse separati da virgole come in:\n"
-                 "  Dimessi guariti, Lazio, 1 settembre - 1 ottobre\n"
-                 "  Tamponi, Sicilia, settimana scorsa - oggi\n\n"
-                 "_Consulta /help per ulteriori informazioni sul formato del messaggio e per una lista completa "
-                 "delle statistiche disponibili._",
+                 "Qui puoi visualizzare i grafici degli andamenti statistici dell'infezione. "
+                 "Invia un messaggio contenente la *statistica*, il *luogo* e il *periodo* di tuo interesse "
+                 "separati da virgole.\n\n"
+                 "_Consulta /help per informazioni ed esempi._",
                  parse_mode=MARKDOWN
                  )
     return TRENDS
@@ -213,20 +209,27 @@ def cb_trends(update: Update, context: CallbackContext):
 def cb_trends_help(update: Update, context: CallbackContext):
     """Help for the TRENDS state"""
     stats = sorted(map(lambda s: s.replace('_', ' ').capitalize(), constants.stats.keys()))
+    stats = '\n '.join(stats)
     send_message(update, context,
                  "Invia un messaggio contenente la *statistica*, il *luogo* e il *periodo* di tuo interesse "
-                 "separati da virgole\\.\n"
-                 "Trovi la lista delle statistiche disponibili al fondo di questo messaggio\\. Il luogo può essere "
-                 "il nome di una provincia, di una regione oppure semplicemente 'Italia'\\. Il periodo deve essere "
-                 "composto da due date \\(\"ultima settimana\" non sarà accettato\\) separate da un trattino \\(\\-\\"
-                 ")\\.\n"
-                 "Evita di usare articoli come in '~il~ 3 maggio \\- ~il~ 3 aprile'\\.\n\n"
-                 "È possibile omettere il luogo e la data\\. Omettendo il luogo saranno mostrati i dati relativi "
-                 "all'Italia, omettendo la data saranno mostrati tutti i dati disponibili\\.\n\n"
-                 "Ricorda che i dati ufficiali disponibili per le province sono diversi rispetto ai dati disponibili "
+                 "separati da virgole\\.\n\n"
+                 "*FORMATO*\n"
+                 "\\-*Statistica*: il nome di una delle statistiche mostrate a fondo di questo messaggio\\.\n"
+                 "\\-*Luogo*: il nome di una *provincia*, *regione* o *Italia*\\.\n"
+                 "\\-*Periodo*: il periodo di tuo interesse, scritto come due date separate da un trattino \\(\\-\\)\n"
+                 "\\(\\>_Data_\\): Puoi scrivere le date in formato numerico \\(20/09/2020\\), "
+                 "per esteso \\(18 luglio\\) o a parole \\(ieri, settimana scorsa, mese scorso\\)\\. "
+                 "Evita di inserire articoli o preposizioni\\.\n\n"
+                 "Puoi omettere il luogo o il periodo, ottenendo rispettivamente i dati sull'Italia e l'intero periodo "
+                 "registrato\\. "
+                 "Ricorda che i dati ufficiali disponibili per le province sono molto ridotti rispetto a quelli "
                  "al livello regionale e nazionale\\.\n\n"
-                 "Complessivamente, i dati disponibili sono: "
-                 f"{', '.join(stats)}",
+                 "*ESEMPI*\n"
+                 " Totale positivi, Italia, 1 Giugno \\- 1 Settembre\n"
+                 " Dimessi guariti, Sicilia, 18/07/2020 \\- 20/10/2020\n"
+                 " Totale casi, Torino, mese scorso \\- oggi\n\n"
+                 "*STATISTICHE*\n\\-"
+                 f"{stats}",
                  parse_mode=MARKDOWN_V2
                  )
     return TRENDS
@@ -253,7 +256,7 @@ def cb_trends_request(update: Update, context: CallbackContext):
             return
         send_photo(update, context, graph,
                    caption=f"Grafico generato da {constants.bot_username}.\n\n"
-                           f"_Manda un'altra richiesta oppure utilizza /home per tornare al menu principale._",
+                           f"_Richiedi altri andamenti oppure usa /home per tornare al menu principale._",
                    parse_mode=MARKDOWN)
     else:
         send_message(update, context, parser.error)
